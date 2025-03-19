@@ -1,19 +1,11 @@
+# src/report_generator.py
+
 import os
 from llm import LLM
+
 class ReportGenerator:
     def __init__(self, llm):
         self.llm = llm
-
-    def generate(self, updates):
-        report = "Latest Release Information:\n\n"
-        for repo, release in updates.items():
-            report += f"Repository: {repo}\n"
-            report += f"Latest Version: {release['tag_name']}\n"
-            report += f"Release Name: {release['name']}\n"
-            report += f"Published at: {release['published_at']}\n"
-            report += f"Release Notes:\n{release['body']}\n"
-            report += "-" * 40 + "\n"
-        return report
 
     def generate_daily_report(self, markdown_file):
         with open(markdown_file, 'r') as f:
@@ -21,8 +13,9 @@ class ReportGenerator:
 
         issues = self.parse_section(content, "## Issues")
         pull_requests = self.parse_section(content, "## Pull Requests")
+        commits = self.parse_section(content, "## Commits")
 
-        summary = self.llm.summarize_issues_prs(issues, pull_requests)
+        summary = self.llm.summarize_issues_prs_commits(issues, pull_requests, commits)
         report_filename = markdown_file.replace('.md', '_report.md')
 
         with open(report_filename, 'w') as f:
